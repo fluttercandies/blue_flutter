@@ -27,14 +27,35 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String deviceName;
 
+  bool isOpenBlue = false;
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
+  void init() {
+    BlueFlutter.permission().then((value) async {
+      isOpenBlue = await BlueFlutter.isOpenBlue();
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => init(),
+        label: Icon(CupertinoIcons.refresh),
+      ),
       appBar: AppBar(
         title: Text(deviceName ?? 'blue_flutter'),
         actions: [
+          CupertinoSwitch(value: isOpenBlue, onChanged: (bool v) => change(v)),
           FlatButton(
             minWidth: 40,
+            padding: EdgeInsets.symmetric(horizontal: 10),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                 return ConnectPage();
@@ -47,16 +68,25 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           FlatButton(
             minWidth: 40,
-            padding: EdgeInsets.symmetric(horizontal: 0),
+            padding: EdgeInsets.symmetric(horizontal: 10),
             onPressed: () => more(),
             child: Icon(CupertinoIcons.ellipsis, color: Colors.white),
           ),
         ],
       ),
-      body: Center(
-        child: Text('蓝牙插件'),
-      ),
+      body: isOpenBlue
+          ? Center(child: Text('蓝牙插件'))
+          : Center(child: Text('暂未打开蓝牙')),
     );
+  }
+
+  void change(bool v) async {
+    if (v) {
+      isOpenBlue = await BlueFlutter.openBlue();
+    } else {
+      isOpenBlue = !(await BlueFlutter.closeBlue());
+    }
+    setState(() {});
   }
 
   void more() {

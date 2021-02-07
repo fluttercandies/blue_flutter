@@ -26,7 +26,7 @@ import java.util.UUID;
  */
 public class BlueToothUtils {
     private static final String TAG = "BlueToothUtils";
-    private Context mContext;
+    public Context mContext;
     public static BlueToothUtils sInstance;
     private BluetoothAdapter mBA;
     // UUID.randomUUID()随机获取UUID
