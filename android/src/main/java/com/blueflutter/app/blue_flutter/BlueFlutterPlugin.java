@@ -2,10 +2,18 @@ package com.blueflutter.app.blue_flutter;
 
 import android.Manifest;
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 
@@ -24,10 +32,6 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
  * BlueFlutterPlugin
  */
 public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
-    /// The MethodChannel that will the communication between Flutter and native Android
-    ///
-    /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-    /// when the Flutter Engine is detached from the Activity
     public String TAG = "BlueFlutterPlugin";
 
     private MethodChannel channel;
@@ -41,13 +45,13 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "blue_flutter");
         channel.setMethodCallHandler(this);
 
+        if (blueToothUtils.mContext == null && context != null) {
+            blueToothUtils.setContext(context);
+        }
     }
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-        if (blueToothUtils.mContext == null && context != null) {
-            blueToothUtils.setContext(context);
-        }
         switch (call.method) {
             case "getPlatformVersion":
                 result.success("Android " + android.os.Build.VERSION.RELEASE);
@@ -57,34 +61,58 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
                 result.success("Android " + android.os.Build.VERSION.RELEASE);
                 break;
             case "permission":
-                assert context != null;
-                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(
-                            activity,
-                            new String[]{
-                                    Manifest.permission.ACCESS_FINE_LOCATION
-                            },
-                            REQUEST_FINE_LOCATION_PERMISSIONS);
-                }
-                result.success("权限申请");
+                reqPermission();
+                result.success(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED);
                 break;
             case "isOpenBlue":
                 result.success(blueToothUtils.getBA().isEnabled());
                 break;
             case "openBlue":
+                reqPermission();
                 boolean isEnable = blueToothUtils.getBA().enable();
-                Log.e(TAG, "isEnable" + isEnable);
+                Log.e(TAG, "isEnable::" + isEnable);
                 result.success(isEnable);
                 break;
             case "closeBlue":
+                reqPermission();
                 boolean isDisable = blueToothUtils.getBA().disable();
-                Log.e(TAG, "isDisable" + isDisable);
+                Log.e(TAG, "isDisable::" + isDisable);
                 result.success(isDisable);
+                break;
+            case "getBondedDevices":
+                reqPermission();
+                List<BluetoothDevice> data = blueToothUtils.getBondedDevices();
+                List<HashMap<Object, Object>> resultMap = new ArrayList<>();
+
+                if (data.size() > 0) {
+                    for (BluetoothDevice device : data) {
+                        HashMap<Object, Object> inMap = new HashMap<>();
+                        inMap.put("name", device.getName());
+                        inMap.put("address", device.getAddress());
+                        resultMap.add(inMap);
+                    }
+                }
+
+                Log.e(TAG, "已配对蓝牙::" + new Gson().toJson(resultMap));
+                result.success(new Gson().toJson(resultMap));
                 break;
             default:
                 result.notImplemented();
                 break;
+        }
+    }
+
+    void reqPermission() {
+        assert context != null;
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    activity,
+                    new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                    },
+                    REQUEST_FINE_LOCATION_PERMISSIONS);
         }
     }
 

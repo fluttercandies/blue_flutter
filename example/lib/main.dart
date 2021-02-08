@@ -1,9 +1,7 @@
 import 'package:blue_flutter_example/pages/connect_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:blue_flutter/blue_flutter.dart';
 
 void main() {
@@ -28,6 +26,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String deviceName;
 
   bool isOpenBlue = false;
+  bool isPermission = true;
 
   @override
   void initState() {
@@ -37,13 +36,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void init() {
     BlueFlutter.permission().then((value) async {
-      isOpenBlue = await BlueFlutter.isOpenBlue();
+      print('是否有权限::$value');
+      isPermission = value;
+      if (isPermission) {
+        isOpenBlue = await BlueFlutter.isOpenBlue();
+      }
       setState(() {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    var body;
+    if (!isPermission) {
+      body = Center(child: Text('请授权位置权限'));
+    } else if (!isOpenBlue) {
+      body = Center(child: Text('暂未打开蓝牙'));
+    } else {
+      body = Center(child: Text('蓝牙插件'));
+    }
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => init(),
@@ -74,9 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: isOpenBlue
-          ? Center(child: Text('蓝牙插件'))
-          : Center(child: Text('暂未打开蓝牙')),
+      body: body,
     );
   }
 

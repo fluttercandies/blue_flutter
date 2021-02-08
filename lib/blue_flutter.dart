@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
+export 'model/bonded_device_model.dart';
 
+import 'package:blue_flutter/model/bonded_device_model.dart';
 import 'package:flutter/services.dart';
 
 class BlueFlutter {
@@ -28,7 +31,16 @@ class BlueFlutter {
     return await _channel.invokeMethod('closeBlue');
   }
 
-  static Future<String> permission() async {
+  static Future<bool> permission() async {
     return await _channel.invokeMethod('permission');
+  }
+
+  static Future<List<BondedDeviceModel>> getBondedDevices() async {
+    String data = await _channel.invokeMethod('getBondedDevices');
+    List dataList = json.decode(data);
+    List<BondedDeviceModel> result = dataList.map<BondedDeviceModel>((e) {
+      return BondedDeviceModel.fromJson(e);
+    }).toList();
+    return result;
   }
 }
