@@ -35,6 +35,10 @@ class BlueFlutter {
     return await _channel.invokeMethod('permission');
   }
 
+  static Future<bool> connect({int index}) async {
+    return await _channel.invokeMethod('connect', {'index': index});
+  }
+
   static Future<List<BondedDeviceModel>> getBondedDevices() async {
     String data = await _channel.invokeMethod('getBondedDevices');
     List dataList = json.decode(data);

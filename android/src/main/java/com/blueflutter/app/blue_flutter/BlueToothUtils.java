@@ -34,7 +34,7 @@ public class BlueToothUtils {
             .fromString("00002902-0000-1000-8000-00805f9b34fb");
 
     // 这里本身即是服务端也是客户端，需要如下类
-    private BluetoothSocket mSocket;
+    public BluetoothSocket mSocket;
     private BluetoothDevice mOldDevice;
     private BluetoothDevice mCurDevice;
     // 输出流_客户端需要往服务端输出
@@ -349,6 +349,10 @@ public class BlueToothUtils {
                         } catch (
                                 IOException connectException) {
                             connectException.printStackTrace();
+
+                            Message msg = new Message();
+                            msg.obj = "连接失败";
+                            handler.sendMessage(msg);
 //                            try {
 //                                Method m = mCurDevice.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
 //                                mSocket = (BluetoothSocket) m.invoke(mCurDevice, 1);
@@ -363,7 +367,7 @@ public class BlueToothUtils {
                         }
                         if (os != null) {
                             //往服务端写信息
-                            write("蓝牙信息来了");
+                            write("hi，你好");
                         }
                     }
                 }
@@ -391,7 +395,7 @@ public class BlueToothUtils {
     // 服务端，需要监听客户端的线程类
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
-            showToast("服务端:" + msg.obj);
+            showToast("" + msg.obj);
             super.handleMessage(msg);
         }
     };

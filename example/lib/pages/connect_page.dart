@@ -30,14 +30,14 @@ class _ConnectPageState extends State<ConnectPage> {
     });
   }
 
-  Widget itemBuild(e) {
+  Widget itemBuild(e, int index) {
     BondedDeviceModel model = e;
     return Container(
       decoration: BoxDecoration(border: Border()),
       child: ListTile(
         title: Text(model.name),
         subtitle: Text(model.address),
-        onTap: () {},
+        onTap: () => Navigator.of(context).pop(index),
       ),
     );
   }
@@ -52,7 +52,9 @@ class _ConnectPageState extends State<ConnectPage> {
             return ListTile(title: Text(title));
           },
           body: ListBody(
-            children: itemMap['data'].map<Widget>(itemBuild).toList(),
+            children: List.generate(itemMap['data'].length, (index) {
+              return itemBuild(itemMap['data'][index], index);
+            }),
           ),
           isExpanded: itemMap['isExtended'],
           canTapOnHeader: true,

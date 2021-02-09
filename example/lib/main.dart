@@ -70,7 +70,14 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                 return ConnectPage();
-              }));
+              })).then((value) {
+                if (value == null || value == '') {
+                  return;
+                }
+                BlueFlutter.connect(index: value).then((result) {
+                  print('连接结果::$result');
+                });
+              });
             },
             child: Text(
               '选择连接',

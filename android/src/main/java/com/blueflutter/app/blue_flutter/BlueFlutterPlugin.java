@@ -97,6 +97,22 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
                 Log.e(TAG, "已配对蓝牙::" + new Gson().toJson(resultMap));
                 result.success(new Gson().toJson(resultMap));
                 break;
+            case "connect":
+                reqPermission();
+                if (blueToothUtils.mContext == null && context != null) {
+                    blueToothUtils.setContext(context);
+                }
+                int index = call.argument("index");
+                Log.e(TAG, "当前的索引为" + index);
+                List<BluetoothDevice> bondedDevices = blueToothUtils.getBondedDevices();
+                BluetoothDevice selectDevice = bondedDevices.get(index);
+                blueToothUtils.connectDevice(selectDevice);
+                if (blueToothUtils.mSocket == null) {
+                    result.success(false);
+                } else {
+                    result.success(blueToothUtils.mSocket.isConnected());
+                }
+                break;
             default:
                 result.notImplemented();
                 break;
