@@ -33,6 +33,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     init();
+    serve();
+  }
+
+  void serve() {
+    BlueFlutter.initSever();
   }
 
   void init() {

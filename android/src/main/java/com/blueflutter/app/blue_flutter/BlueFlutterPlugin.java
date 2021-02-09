@@ -133,6 +133,16 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
                     result.success(blueToothUtils.mSocket.isConnected());
                 }
                 break;
+            case "initSever":
+                reqPermission();
+                if (blueToothUtils == null) {
+                    blueToothUtils = new BlueToothUtils();
+                }
+                if (blueToothUtils.mContext == null && context != null) {
+                    blueToothUtils.setContext(context);
+                }
+                blueToothUtils.getAc().start();
+                break;
             default:
                 result.notImplemented();
                 break;
