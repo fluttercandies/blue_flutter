@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import io.flutter.plugin.common.EventChannel;
+
 /**
  * Created by shaolin on 5/23/16.
  */
@@ -37,6 +39,8 @@ public class BlueToothUtils {
     public BluetoothSocket mSocket;
     private BluetoothDevice mOldDevice;
     private BluetoothDevice mCurDevice;
+    private EventChannel.EventSink eventSink;
+
     // 输出流_客户端需要往服务端输出
     private OutputStream os;
 
@@ -57,6 +61,11 @@ public class BlueToothUtils {
     public BlueToothUtils() {
         if (mBA == null) mBA = BluetoothAdapter.getDefaultAdapter();
         if (ac == null) ac = new AcceptThread();
+    }
+
+    public void setEventSink(EventChannel.EventSink eventSink){
+        this.eventSink = eventSink;
+        Log.e(TAG, "船只22::" + (eventSink == null));
     }
 
     public void setContext(Context context) {
@@ -352,6 +361,9 @@ public class BlueToothUtils {
                         } catch (
                                 IOException connectException) {
                             connectException.printStackTrace();
+                            mCurDevice = null;
+                            mOldDevice = null;
+                            mSocket = null;
 
                             Message msg = new Message();
                             msg.obj = "连接失败";
@@ -402,6 +414,7 @@ public class BlueToothUtils {
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             showToast(String.valueOf(msg.obj));
+            eventSink.success(msg.obj);
             super.handleMessage(msg);
         }
     };

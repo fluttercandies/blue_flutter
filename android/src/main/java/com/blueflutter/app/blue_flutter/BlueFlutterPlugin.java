@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -32,7 +34,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 /**
  * BlueFlutterPlugin
  */
-public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware,EventChannel.StreamHandler {
+public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware, EventChannel.StreamHandler {
     public String TAG = "BlueFlutterPlugin";
 
     private MethodChannel channel;
@@ -42,6 +44,10 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
     private Context context;
     private Activity activity;
     private BlueToothUtils blueToothUtils;
+
+    public void eventSinkIsNull() {
+        Log.e(TAG, "数据流通道是否为空::" + (eventSink == null));
+    }
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -58,6 +64,7 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
                 result.success("Android " + android.os.Build.VERSION.RELEASE);
                 break;
             case "showToast":
+                eventSinkIsNull();
                 eventSink.success("test");
 //                Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show();
                 result.success("Android " + android.os.Build.VERSION.RELEASE);
@@ -70,11 +77,22 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
                 if (blueToothUtils.mContext == null && context != null) {
                     blueToothUtils.setContext(context);
                 }
+                result.success(blueToothUtils.getBA().isEnabled());
+                if (eventSink != null) {
+                    blueToothUtils.setEventSink(eventSink);
+                } else {
+                    Log.e(TAG, "船只11::为空");
+                }
                 result.success(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED);
                 break;
             case "isOpenBlue":
                 result.success(blueToothUtils.getBA().isEnabled());
+                if (eventSink != null) {
+                    blueToothUtils.setEventSink(eventSink);
+                } else {
+                    Log.e(TAG, "船只11::为空");
+                }
                 break;
             case "openBlue":
                 reqPermission();
@@ -144,6 +162,11 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
                 if (blueToothUtils == null) {
                     blueToothUtils = new BlueToothUtils();
                 }
+                if (eventSink != null) {
+                    blueToothUtils.setEventSink(eventSink);
+                } else {
+                    Log.e(TAG, "船只22::为空");
+                }
                 if (blueToothUtils.mContext == null && context != null) {
                     blueToothUtils.setContext(context);
                 }
@@ -198,6 +221,7 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
 
     @Override
     public void onListen(Object arguments, EventChannel.EventSink events) {
+        Log.e(TAG, "eventSink赋值");
         this.eventSink = events;
     }
 
