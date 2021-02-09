@@ -344,6 +344,9 @@ public class BlueToothUtils {
                                 // 获得输出流
                                 os = mSocket.getOutputStream();
 
+                                Message msg = new Message();
+                                msg.obj = "连接成功";
+                                handler.sendMessage(msg);
                             }
                             // 如果成功获得输出流
                         } catch (
@@ -386,6 +389,9 @@ public class BlueToothUtils {
                 os.write(message.getBytes("GBK"));
             }
             Log.e(TAG, "write:" + message);
+            Message msg = new Message();
+            msg.obj = "发送消息:" + "\"" + message + "\"" + "成功";
+            handler.sendMessage(msg);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -395,7 +401,7 @@ public class BlueToothUtils {
     // 服务端，需要监听客户端的线程类
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
-            showToast("" + msg.obj);
+            showToast(String.valueOf(msg.obj));
             super.handleMessage(msg);
         }
     };

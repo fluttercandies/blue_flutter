@@ -1,4 +1,5 @@
 import 'package:blue_flutter_example/pages/connect_page.dart';
+import 'package:blue_flutter_example/widget/input_dailog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -53,7 +54,17 @@ class _MyHomePageState extends State<MyHomePage> {
     } else if (!isOpenBlue) {
       body = Center(child: Text('暂未打开蓝牙'));
     } else {
-      body = Center(child: Text('蓝牙插件'));
+      body = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          RaisedButton(
+            onPressed: () => send(),
+            child: Text('发送数据'),
+          ),
+          Text('蓝牙插件'),
+        ],
+      );
     }
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
@@ -92,8 +103,30 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: body,
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        child: body,
+      ),
     );
+  }
+
+  void send() {
+    inputDialog(
+      context,
+      title: '导入',
+      hintText: '输入导入文本',
+      maxLength: 999,
+    ).then((v) {
+      if (!strNoEmpty(v)) {
+        return;
+      }
+      try {
+        BlueFlutter.sendMsg(v);
+      } catch (e) {
+        print('v::${e.toString()}');
+        showToast('数据错误，导入失败');
+      }
+    });
   }
 
   void change(bool v) async {

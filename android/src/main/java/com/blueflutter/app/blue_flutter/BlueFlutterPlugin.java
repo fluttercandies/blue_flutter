@@ -38,16 +38,12 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
     private static final int REQUEST_FINE_LOCATION_PERMISSIONS = 1452;
     private Context context;
     private Activity activity;
-    private final BlueToothUtils blueToothUtils = new BlueToothUtils();
+    private BlueToothUtils blueToothUtils;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "blue_flutter");
         channel.setMethodCallHandler(this);
-
-        if (blueToothUtils.mContext == null && context != null) {
-            blueToothUtils.setContext(context);
-        }
     }
 
     @Override
@@ -62,6 +58,12 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
                 break;
             case "permission":
                 reqPermission();
+                if (blueToothUtils == null) {
+                    blueToothUtils = new BlueToothUtils();
+                }
+                if (blueToothUtils.mContext == null && context != null) {
+                    blueToothUtils.setContext(context);
+                }
                 result.success(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED);
                 break;
@@ -80,8 +82,26 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
                 Log.e(TAG, "isDisable::" + isDisable);
                 result.success(isDisable);
                 break;
+            case "sendMsg":
+                reqPermission();
+                if (blueToothUtils == null) {
+                    blueToothUtils = new BlueToothUtils();
+                }
+                if (blueToothUtils.mContext == null && context != null) {
+                    blueToothUtils.setContext(context);
+                }
+                String msg = call.argument("msg");
+                blueToothUtils.write(msg);
+                result.success(true);
+                break;
             case "getBondedDevices":
                 reqPermission();
+                if (blueToothUtils == null) {
+                    blueToothUtils = new BlueToothUtils();
+                }
+                if (blueToothUtils.mContext == null && context != null) {
+                    blueToothUtils.setContext(context);
+                }
                 List<BluetoothDevice> data = blueToothUtils.getBondedDevices();
                 List<HashMap<Object, Object>> resultMap = new ArrayList<>();
 
