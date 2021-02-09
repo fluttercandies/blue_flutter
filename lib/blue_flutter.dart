@@ -7,6 +7,22 @@ import 'package:flutter/services.dart';
 
 class BlueFlutter {
   static const MethodChannel _channel = const MethodChannel('blue_flutter');
+  static const EventChannel _event = const EventChannel('blue_flutter_event');
+
+  Stream<dynamic> _listener;
+
+  Stream<dynamic> get onMessage {
+    if (_listener == null) {
+      _listener = _event
+          .receiveBroadcastStream()
+          .map((dynamic event) => _parseBatteryState(event));
+    }
+    return _listener;
+  }
+
+  dynamic _parseBatteryState(event) {
+    return event;
+  }
 
   static Future<String> get platformVersion async {
     final String version = await _channel.invokeMethod('getPlatformVersion');

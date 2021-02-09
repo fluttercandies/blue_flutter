@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -31,10 +32,12 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 /**
  * BlueFlutterPlugin
  */
-public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
+public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware,EventChannel.StreamHandler {
     public String TAG = "BlueFlutterPlugin";
 
     private MethodChannel channel;
+    private EventChannel.EventSink eventSink;
+    private EventChannel event;
     private static final int REQUEST_FINE_LOCATION_PERMISSIONS = 1452;
     private Context context;
     private Activity activity;
@@ -44,6 +47,8 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "blue_flutter");
         channel.setMethodCallHandler(this);
+        event = new EventChannel(flutterPluginBinding.getBinaryMessenger(), "blue_flutter_event");
+        event.setStreamHandler(this);
     }
 
     @Override
@@ -53,7 +58,8 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
                 result.success("Android " + android.os.Build.VERSION.RELEASE);
                 break;
             case "showToast":
-                Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show();
+                eventSink.success("test");
+//                Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show();
                 result.success("Android " + android.os.Build.VERSION.RELEASE);
                 break;
             case "permission":
@@ -188,5 +194,15 @@ public class BlueFlutterPlugin implements FlutterPlugin, MethodCallHandler, Acti
     @Override
     public void onDetachedFromActivity() {
 
+    }
+
+    @Override
+    public void onListen(Object arguments, EventChannel.EventSink events) {
+        this.eventSink = events;
+    }
+
+    @Override
+    public void onCancel(Object arguments) {
+        Log.e(TAG, "onCancel() called with: o = [" + arguments + "]");
     }
 }

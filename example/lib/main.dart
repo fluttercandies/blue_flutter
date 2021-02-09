@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:blue_flutter_example/pages/connect_page.dart';
 import 'package:blue_flutter_example/widget/input_dailog.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,11 +31,28 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isOpenBlue = false;
   bool isPermission = true;
 
+  StreamSubscription<dynamic> _messageStreamSubscription;
+
   @override
   void initState() {
     super.initState();
     init();
     serve();
+    initPlatformState();
+  }
+
+  Future<void> initPlatformState() async {
+    if (!mounted) return;
+    if (_messageStreamSubscription == null) {
+      _messageStreamSubscription =
+          BlueFlutter().onMessage.listen((dynamic onData) {
+        print('flutter收到消息::${onData.toString()}');
+      });
+    }
+  }
+
+  void canCelListener() {
+    if (_messageStreamSubscription != null) _messageStreamSubscription.cancel();
   }
 
   void serve() {
